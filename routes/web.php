@@ -48,7 +48,7 @@ Route::middleware(['auth'])->group(function () {
     
     // UNSECURE
     //Route::prefix('dashboard')->group(function () {
-    
+
     // SECURE
     Route::middleware(['admin'])->prefix('dashboard')->group(function () {
         Route::get('/', [AdminController::class,'dashboard'])->name('dashboard');
@@ -61,10 +61,10 @@ Route::middleware(['auth'])->group(function () {
         // Route::post('/articles/{id}/toggle',[AdminController::class,'toggleArticleStatus'])->name('admin.articles.toggle');
     });
     // UNSECURE
-    Route::post('/articles/{articleId}/comments', [CommentController::class, 'store'])->name('comments.store');
+    //Route::post('/articles/{articleId}/comments', [CommentController::class, 'store'])->name('comments.store');
     
-    // SECURE
-    // Route::post('/articles/{articleId}/comments', [CommentController::class, 'store'])->middleware(['block.suspicious'])->name('comments.store');
+    // SECURE; aggiunta del middleware block_suspicious_ip per limitare i tentativi di commento 
+    Route::post('/articles/{articleId}/comments', [CommentController::class, 'store'])->middleware(['block_suspicious_ip'])->name('comments.store');
 });
 
 Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
