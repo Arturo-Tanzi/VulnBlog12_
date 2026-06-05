@@ -75,10 +75,15 @@ class UserController extends Controller
         // calculate hash
 
         // UNSECURE with md5
-        $newImageHash = md5_file($newImage);
+        //$newImageHash = md5_file($newImage);
 
-        // SECURE with sha56
-        // $newImageHash = hash_file('sha256', $newImage);
+        // SECURE with sha256 (algoritmo più sicuro e meno vulnerabile a collisioni rispetto a md5)
+        //Per evitare che un attaccante possa calcolare il hash di un file malevolo con lo stesso hash di un file legittimo, è possibile utilizzare un algoritmo di hashing più sicuro come SHA-256, che produce un hash più lungo e complesso, rendendo molto più difficile per un attaccante trovare due file diversi con lo stesso hash (collisione).
+        // sha1 è considerato insicuro e vulnerabile a collisioni, quindi non è consigliato
+        // ? sha256 è attualmente considerato sicuro e resistente alle collisioni, quindi è una scelta migliore rispetto a md5 e sha1 per calcolare l'hash di un file.
+        // sha512 è ancora più sicuro di sha256, ma è più lento da calcolare, quindi potrebbe non essere necessario per la maggior parte delle applicazioni. 
+        // sha384 è ancora più sicuro di sha512, ma è ancora più lento da calcolare, quindi potrebbe essere eccessivo per la maggior parte delle applicazioni.
+        $newImageHash = hash_file('sha256', $newImage);
     
         // compare hash
         if($newImageHash == $user->avatar){
