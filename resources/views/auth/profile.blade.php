@@ -92,6 +92,27 @@
       </div>
     </div>
   </div>
+
+
+ {{-- Upload Documents --}}
+  <h2> User Documents </h2>
+  <ul>
+    @forelse($user->files as $file)
+      <li>
+        <a href="{{route('download.private',$file->uid)}}">{{$file->name}}</a>
+      </li>
+    @empty
+      <p class="text-muted">No files uploaded.</p>
+    @endforelse
+  </ul>
+  <form method="POST" action="{{route('upload')}}" enctype="multipart/form-data">
+    @csrf
+    <div class="d-flex">
+      <input for="file" name="file" class="form-control">
+    <button type="submit" class="btn btn-primary mx-3">Upload</button>
+    </div>
+  </form>
+
   <!-- Bootstrap Icons CDN -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </x-layouts.app>

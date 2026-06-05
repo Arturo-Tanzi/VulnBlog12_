@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -109,4 +110,74 @@ class UserController extends Controller
     public function download(Request $request) {
         return response()->download(storage_path('app/private/'.$request->get('filename')));
     }
+    public function upload(Request $request) {
+        
+    // UNSECURE
+        // if(!$user = Auth::user()){ {
+        //     return back()->with('message','Please Log In');
+        // }
+        // if(!$request->hasFile('file')) {
+        //     return back()->with('message','Forbidden Operation');
+        // }
+        // $path = storage_path('app/public/docs/users/'.$user->id);
+        // if (!file_exists($path)) {
+        //     mkdir($path, 0777, true);
+        // }
+        // $file = $request->file('file');
+    
+        // //UNSECURE
+        // $fileName = $file->getClientOriginalName();
+    
+        // $file->move($path, $fileName);
+    
+        // File::create([
+        //     'name' => $fileName,
+        //     'user_id' => $user->id,
+        // ]);
+        
+        // return back()->with('message','File uploaded');
+    
+        // SECURE
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'pdf']; // Estensione consentite
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf']; // MIME type consentiti
+    
+        $file = $request->file('file');
+        $extensione = strtolower($file->getClientOriginalExtension());
+        $mimeType = $file->getMimeType();
+    
+        if (!in_array($extensione, $allowedExtensions) || !in_array($mimeType, $allowedMimeTypes)) {
+            return back()->withErrors(['File type not allowed.']);
+        }
+        $filename = $file->getClientOriginalName();
+        $fileuid = uniqid(). '.' . $extensione; // Genera un nome univoco per il file
+        $path = $file->storeAs("docs/users/{$user->id}", $fileuid, 'local'); // Salva il file con il nome univoco
+        File::create([
+            'name' => $filename,
+            'uid' => $fileuid,
+            'user_id' => $user->id,
+        ]);
+        return back()->with('message','File uploaded');
+    }
+
+    public function downloadPrivateFile(Request $request) 
+    {
+        if (!$user = Auth::user()) {
+            return back()->with('message','Please Log In');
+        }
+
+        $fileRecord = File::where('uid', $file)->where('user_id', $user->id)->firstOrFail();
+
+        if (!$fileRecord) {
+            return back()->with('message','File not found');
+        }
+
+        $path = "docs/users/{$user->id}/{$fileRecord->uid}";
+
+        if (!Storage::disk('local')->exists($path)) {
+            abort(404);
+        }
+
+        return Storage::disk('local')->download($path, $fileRecord->uid);
+    }
+
 }
