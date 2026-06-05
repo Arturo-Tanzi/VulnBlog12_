@@ -12,20 +12,20 @@ use Intervention\Image\Facades\Image as Image;
 class UserController extends Controller
 {
     // UNSECURE
-    public function show($id)
-	{
-		$user = User::findOrFail($id);
+    // public function show($id)
+	// {
+	// 	$user = User::findOrFail($id);
 
-        return view('auth.profile',compact('user'));
-	}
+    //     return view('auth.profile',compact('user'));
+	// }
 
     // SECURE
-    // public function profile(){
-    //     if(!$user = Auth::user())
-    //     return response()->json(['message' => 'Forbidden Operation'], 403);
+    public function profile(){
+        if(!$user = Auth::user()) //Se l'utente non è autenticato, ritorna un errore 403
+        return response()->json(['message' => 'Forbidden Operation'], 403);
         
-    //     return view('auth.profile',compact('user'));
-    // }
+        return view('auth.profile',compact('user')); //Ritorna la vista del profilo con i dati dell'utente autenticato
+    }
 
     public function update(Request $request, $id){
         $user = User::find($id);
