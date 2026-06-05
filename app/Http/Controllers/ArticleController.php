@@ -27,12 +27,13 @@ class ArticleController extends Controller
     public function search(Request $request){
         
         // UNSECURE
-        $articles = Article::whereRaw("title like '%{$request->search}%'")->get();
+        // $articles = Article::whereRaw("title like '%{$request->search}%'")->get();
 
-        // SECURE
-        // $articles = Article::where('title', 'LIKE', "%{$request->search}%")
-        //                     ->orWhere('content', 'LIKE', "%{$request->search}%")
-        // ->get();
+        // SECURE: utilizzo di whereRaw con binding dei parametri per prevenire SQL injection
+        // Se viene inserito un carattere speciale come (') o (;) ecc... all'interno del campo di ricerca, il binding dei parametri assicura che questi caratteri vengano trattati come parte della stringa di ricerca e non come parte della query SQL, prevenendo così attacchi di SQL injection.
+        $articles = Article::where('title', 'LIKE', "%{$request->search}%")
+                            ->orWhere('content', 'LIKE', "%{$request->search}%")
+        ->get();
         
         return view('articles.index',compact('articles'));
     }
