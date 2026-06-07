@@ -5,6 +5,9 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 class BlockSuspiciousIP
 {
@@ -23,13 +26,14 @@ class BlockSuspiciousIP
 
         if (Cache::has($key . ':blocked')) {
             Session::flash('error', "Too many attempts. Your IP has been blocked for $this->blockMinutes minute(s).");
+            Log::warning("IP $ip is blocked for $this->blockMinutes minute(s) due to too many attempts.");
             return redirect()->back();
         }
         if(Cache::has($key)){
             $attempts = Cache::increment($key);
         if ($attempts > $this->maxAttempts) {
             Cache::put($key . ':blocked', true, $this->blockMinutes * 60);
-            Log::warning("IP $ip has been blocked for $this->blockMinutes minute(s) due to too many attempts.");
+            Log::warning("IP $ip has been blocked for $this->blockMinutes minute(s) due to too many attempts."); // Logga l'evento di blocco dell'IP con un messaggio di avviso
             Session::flash('error', "Too many attempts. Your IP has been blocked for $this->blockMinutes minute(s).");
             return redirect()->back();
         }
