@@ -31,7 +31,14 @@ class UserController extends Controller
     public function update(Request $request, $id){
         $user = User::find($id);
 
-        $user->update($request->all());
+        // Faccio la VALIDAZIONE dei dati in ingresso
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
+            'password' => 'nullable|string|min:8|confirmed',
+        ]);
+         $user->update($request->all());
+
 
         return back()->with('message','User updated');
     }
@@ -108,6 +115,14 @@ class UserController extends Controller
     }
 
     public function download(Request $request) {
+    // SECURE
+    // $filename = $request->get('filename');
+    // if (!$file_exists = (storage_path('app/public/'.$filename))) {
+    //     return back()->with('message','Filename NOT FOUND');
+    // }
+    return Storage::disk('local')->download($request->get('filename'));
+
+    //UNSECURE
         return response()->download(storage_path('app/private/'.$request->get('filename')));
     }
     public function upload(Request $request) {
